@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b1020">
+<title>Travel Loyalty Card</title>
+<style>
+:root{--bg1:#f4efe6;--bg2:#e6dcc8;--ink:#1a1a2e;--muted:#6b6478;--box-sizing:border-box;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#121a36;--bg2:#05070f;--ink:#f5efe0;--muted:#9a97b0}}
+:root[data-theme="dark"]{--bg1:#121a36;--bg2:#05070f;--ink:#f5efe0;--muted:#9a97b0}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(120% 90% at 50% 0%,var(--bg1),var(--bg2));color:var(--ink);font-family:"Inter",-apple-system,"Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+h1{margin:0;font-size:13px;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);font-weight:600;animation:fade 1s .1s both}
+.scene{perspective:1000px;animation:rise .9s cubic-bezier(.2,.9,.2,1) both}
+.card{position:relative;width:min(88vw,380px);padding:24px 22px 22px;border-radius:26px;color:#f5efe0;background:linear-gradient(135deg,#1b2a5c 0%,#0e1633 55%,#2a1b4a 100%);box-shadow:0 30px 60px -20px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.08);transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .25s ease-out;overflow:hidden;transform-style:preserve-3d}
+.card::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent,rgba(255,214,120,.16),transparent 30%);animation:spin 9s linear infinite}
+.card::after{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(255,255,255,.18),transparent 60%);pointer-events:none}
+.card>*{position:relative;z-index:1}
+.top{display:flex;justify-content:space-between;align-items:flex-start}
+.brand{font-size:20px;font-weight:700;letter-spacing:.02em}
+.brand small{display:block;font-size:10px;letter-spacing:.3em;color:#e8c872;font-weight:600;margin-top:4px;text-transform:uppercase}
+.count{font-size:34px;font-weight:700;line-height:1;text-align:right;color:#ffd978}
+.count small{font-size:13px;color:#9fa7cf;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0 18px}
+.slot{aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative;border:1.5px dashed rgba(255,255,255,.28);background:rgba(255,255,255,.04);font-size:13px;color:rgba(255,255,255,.35);font-weight:600}
+.slot svg{width:52%;height:52%;transform:scale(0) rotate(-40deg);opacity:0}
+.slot.on{border:1.5px solid #ffd978;background:radial-gradient(circle at 30% 25%,#ffe9a8,#e0a93a 70%);color:#3a2600;box-shadow:0 6px 16px -4px rgba(255,200,80,.55)}
+.slot.on svg{transform:none;opacity:1}
+.slot.on span{display:none}
+.slot.pop{animation:stamp .9s cubic-bezier(.2,1.4,.3,1) both}
+.slot.pop svg{animation:fly .9s .15s cubic-bezier(.2,1.4,.3,1) both}
+.slot.pop::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #ffd978;animation:ring 1s .2s ease-out both}
+.slot.gift{grid-column:span 2;aspect-ratio:auto;border-radius:999px;gap:8px;grid-auto-flow:column;letter-spacing:.14em;font-size:11px;text-transform:uppercase}
+.slot.gift svg{width:20px;height:20px;transform:none;opacity:.6}
+.slot.gift.on{animation:glow 1.6s ease-in-out infinite}
+.slot.gift.on svg{opacity:1}
+.foot{display:flex;justify-content:space-between;font-size:11px;color:#9fa7cf;letter-spacing:.08em}
+.bar{height:4px;border-radius:4px;background:rgba(255,255,255,.1);margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e0a93a,#ffe9a8);transition:width 1s cubic-bezier(.2,.9,.2,1)}
+button{font:inherit;border:0;cursor:pointer;color:#3a2600;background:linear-gradient(135deg,#ffe9a8,#e0a93a);padding:14px 26px;border-radius:999px;font-weight:700;letter-spacing:.06em;box-shadow:0 12px 24px -10px rgba(224,169,58,.8);transition:transform .15s;display:none;animation:rise .6s both}
+button:active{transform:scale(.96)}
+button.show{display:block}
+.toast{position:fixed;left:50%;bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translate(-50%,40px);opacity:0;background:#111a36;color:#f5efe0;padding:12px 20px;border-radius:999px;font-size:14px;transition:.5s cubic-bezier(.2,.9,.2,1);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:90vw;text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:9}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes stamp{0%{transform:scale(3.2) rotate(-25deg);opacity:0}55%{transform:scale(.88) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0)}}
+@keyframes fly{from{transform:translate(-60px,40px) scale(0) rotate(-40deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(2.2);opacity:0}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(255,217,120,.6)}50%{box-shadow:0 0 0 12px rgba(255,217,120,0)}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<h1 id="brand">Explore Egypt</h1>
+<div class="scene"><div class="card" id="card">
+  <div class="top">
+    <div class="brand">Travel Club<small>Loyalty Card</small></div>
+    <div class="count"><span id="n">0</span><small> / 6</small></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="foot"><span id="msg">Collect 6 stamps</span><span>7TH TRIP FREE</span></div>
+  <div class="bar"><i id="bar"></i></div>
+</div></div>
+<button id="redeem">REDEEM FREE TRIP</button>
+<div class="toast" id="toast"></div>
+<canvas id="cv"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const CFG={brand:"Explore Egypt",goal:6,cooldownHours:6,key:"loyalty-card-v1"};
+const PLANE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg>';
+const GIFT='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 7h-2.2A3 3 0 0 0 12 4.8 3 3 0 0 0 6.2 7H4a1 1 0 0 0-1 1v3h8V7h2v4h8V8a1 1 0 0 0-1-1zM9 7a1 1 0 1 1 1-1v1zm6 0h-1V6a1 1 0 1 1 1 1zM4 13v6a1 1 0 0 0 1 1h6v-7zm9 0v7h6a1 1 0 0 0 1-1v-6z"/></svg>';
+document.getElementById("brand").textContent=CFG.brand;
+const $=id=>document.getElementById(id);
+const sb=supabase.createClient("https://fiflqqhnkrlqznxmlygg.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpZmxxcWhua3JscXpueG1seWdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI1MzcxNTYsImV4cCI6MjEwODExMzE1Nn0.KnL3yBOM16JkmUBQXnpgUwfEizT6APFADcuttv6DSOY");
+let st={n:0},ready=false;
+const grid=$("grid");
+for(let i=1;i<=CFG.goal;i++){const d=document.createElement("div");d.className="slot";d.innerHTML="<span>"+i+"</span>"+PLANE;grid.appendChild(d)}
+const g=document.createElement("div");g.className="slot gift";g.innerHTML=GIFT+"<span>Free trip</span>";grid.appendChild(g);
+const slots=[...grid.children];
+function toast(t){const e=$("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),3200)}
+function render(animIdx){
+  slots.slice(0,CFG.goal).forEach((s,i)=>{const on=i<st.n;s.classList.toggle("on",on);if(i===animIdx){s.classList.remove("pop");void s.offsetWidth;s.classList.add("pop")}});
+  const done=st.n>=CFG.goal;
+  g.classList.toggle("on",done);
+  $("n").textContent=Math.min(st.n,CFG.goal);
+  $("bar").style.width=Math.min(100,st.n/CFG.goal*100)+"%";
+  $("msg").textContent=done?"Your free trip is ready":(CFG.goal-st.n)+" more to go";
+  $("redeem").classList.toggle("show",done);
+}
+async function stamp(code){
+  if(!ready){toast("Offline — try again");return}
+  if(st.n>=CFG.goal){toast("Free trip ready — redeem it first");return}
+  const {data,error}=await sb.rpc("stamp",{p_code:code});
+  if(error){toast(/bad_code/.test(error.message)?"Invalid code":"Already stamped — come back later");return}
+  st.n=data.n;
+  setTimeout(()=>{render(st.n-1);try{navigator.vibrate&&navigator.vibrate([30,40,60])}catch(e){}
+    if(st.n>=CFG.goal)setTimeout(()=>{confetti();toast("Free trip unlocked!")},900);else toast("Stamp added ✓")},500);
+}
+$("redeem").onclick=async()=>{
+  if(!confirm("Show this to your guide to redeem. Mark as used?"))return;
+  const {error}=await sb.rpc("redeem");
+  if(error){toast("Could not redeem — try again");return}
+  st.n=0;render();toast("Redeemed — enjoy your trip!");
+};
+render();
+(async()=>{
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){const r=await sb.auth.signInAnonymously();if(r.error)throw r.error}
+    const {data,error}=await sb.rpc("get_card");if(error)throw error;
+    st.n=data.n;ready=true;render();
+    const h=location.hash.slice(1);
+    if(h.startsWith("stamp-")){stamp(h.slice(6));try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}}
+  }catch(e){toast("Connection problem")}
+})();
+// tilt
+const card=$("card");
+function tilt(x,y){const r=card.getBoundingClientRect();const px=(x-r.left)/r.width,py=(y-r.top)/r.height;
+  card.style.setProperty("--ry",((px-.5)*14)+"deg");card.style.setProperty("--rx",((.5-py)*14)+"deg");
+  card.style.setProperty("--mx",px*100+"%");card.style.setProperty("--my",py*100+"%")}
+addEventListener("pointermove",e=>tilt(e.clientX,e.clientY));
+addEventListener("pointerleave",()=>{card.style.setProperty("--rx","0deg");card.style.setProperty("--ry","0deg")});
+// confetti
+function confetti(){
+  const c=$("cv"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#ffd978","#e0a93a","#ffffff","#7aa2ff","#ff8fb1"];
+  const p=Array.from({length:140},()=>({x:innerWidth/2,y:innerHeight*.45,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,s:4+Math.random()*6,r:Math.random()*6,c:cols[Math.random()*5|0]}));
+  let f=0;(function loop(){x.clearRect(0,0,c.width,c.height);
+    p.forEach(o=>{o.vy+=.35;o.x+=o.vx;o.y+=o.vy;o.r+=.2;x.save();x.translate(o.x,o.y);x.rotate(o.r);x.fillStyle=o.c;x.fillRect(-o.s/2,-o.s/2,o.s,o.s*.6);x.restore()});
+    if(++f<170)requestAnimationFrame(loop);else x.clearRect(0,0,c.width,c.height)})();
+}
+</script>
+</body>
+</html>
